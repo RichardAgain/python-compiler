@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "start": "tsc lexer.ts && node lexer.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.1"
+  }
+}
