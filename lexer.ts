@@ -6,7 +6,8 @@ export enum Tokentype {
     Identifier = "identificador",
     Operator = "operador binario",
     OpenParent = "abre grupo",
-    CloseParent = "cierra grupo"
+    CloseParent = "cierra grupo",
+    EOF = "EOF"
 }
 
 export interface Token {
@@ -14,7 +15,7 @@ export interface Token {
     type: Tokentype
 }
 
-const tokenize = (source: string): Token[] => {
+export const tokenize = (source: string): Token[] => {
 
     const tokens = new Array<Token>()
     const entries = source.split('')
@@ -41,8 +42,13 @@ const tokenize = (source: string): Token[] => {
             }
 
             tokens.push({ value: number, type: Tokentype.Number })
+            continue;
         }
+
+        console.log('caracter desconocido: ' + entry)
     }
+
+    tokens.push({ value: "EndOfFile", type: Tokentype.EOF })
 
     return tokens
 }

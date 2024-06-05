@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Tokentype = void 0;
+exports.tokenize = exports.Tokentype = void 0;
 var fs = require("fs");
 var Tokentype;
 (function (Tokentype) {
@@ -9,6 +9,7 @@ var Tokentype;
     Tokentype["Operator"] = "operador binario";
     Tokentype["OpenParent"] = "abre grupo";
     Tokentype["CloseParent"] = "cierra grupo";
+    Tokentype["EOF"] = "EOF";
 })(Tokentype || (exports.Tokentype = Tokentype = {}));
 var tokenize = function (source) {
     var tokens = new Array();
@@ -41,9 +42,13 @@ var tokenize = function (source) {
                 entries.shift();
             }
             tokens.push({ value: number, type: Tokentype.Number });
+            continue;
         }
+        console.log('caracter desconocido: ' + entry);
     }
+    tokens.push({ value: "EndOfFile", type: Tokentype.EOF });
     return tokens;
 };
+exports.tokenize = tokenize;
 var file = fs.readFileSync('./texto.txt', 'utf-8');
-console.log(tokenize(file));
+console.log((0, exports.tokenize)(file));
