@@ -1,14 +1,9 @@
 
-import * as fs from 'fs';
 import Parser from "./frontend/parser";
 
-
-const repl = (source: string) => {
+export const repl = (source: string) => {
     const parser = new Parser()
-    const program = parser.produceAST(file)
+    const program = parser.produceAST(source)
     
-    return (program)
+    return JSON.stringify(program, null, 4)
 }
-
-const file = fs.readFileSync('./texto.txt', 'utf-8');
-console.log(repl(file))
