@@ -1,5 +1,5 @@
 
-import { Statement, Program, Expression, BinaryExp, Identifier, NumericLiteral, } from './ast'
+import { Statement, Program, Expression, BinaryExp, Identifier, NumericLiteral, AssigmentExpression, VariableDeclaration, ExpressionDeclaration, } from './ast'
 import { Token, TokenType, tokenize } from './lexer'
 
 export default class Parser {
@@ -12,6 +12,10 @@ export default class Parser {
 
     private at (){
         return this.tokens[0] as Token;
+    }
+
+    private next (){
+        return this.tokens[1] as Token;
     }
 
     private eat () {
@@ -50,11 +54,55 @@ export default class Parser {
     private parse_stmt (): Statement {
         // no hay ninguna declaracion, se salta
 
-        return this.parse_expr();
+        switch (this.at().type) {
+            case TokenType.IDENTIFIER:
+                if (this.next().type == TokenType.EQUAL) {
+                    return this.parse_variable_declaration();
+                } else {
+                    return this.parse_expr_declaration();
+                }
+            
+            default:
+                return this.parse_expr_declaration();
+        }
+                
+    }
+    private parse_expr_declaration(): Statement {
+        return {
+            kind: "ExpressionDeclaration",
+            expression: this.parse_expr(),
+        } as ExpressionDeclaration;
+    }
+
+    private parse_variable_declaration(): Statement {
+
+        const identifier = this.eat().value;
+        this.eat(); // elimina el "="
+        return {
+            kind: "VariableDeclaration",
+            identifier: { kind: "Identifier", symbol: identifier } as Identifier,
+            value: this.parse_additive_expr(),
+        } as VariableDeclaration;
     }
 
     private parse_expr (): Expression {
-        return this.parse_additive_expr();
+        return this.parse_assignment_expr();
+    }
+
+    private parse_assignment_expr (): Expression {
+        let left = this.parse_primary_expr();
+
+        if(this.at().type == TokenType.EQUAL) {
+            this.eat();
+            const right = this.parse_expr();
+            left = {
+                kind: "AssigmentExpression",
+                assigne: left,
+                value: right,
+            } as AssigmentExpression
+        }
+
+        return left;
     }
 
     private parse_additive_expr(): Expression {
@@ -77,7 +125,7 @@ export default class Parser {
     private parse_multiplicative_expr(): Expression {
         let left = this.parse_primary_expr();
 
-    while (/[*/%]/.exec(this.at().value)){
+        while (/[*/%]/.exec(this.at().value)){
             const operator = this.eat().value;
             const right = this.parse_primary_expr();
             left = {
@@ -106,12 +154,12 @@ export default class Parser {
                 } as NumericLiteral;
             case TokenType.LEFT_PAREN:
                 this.eat(); // elimina el primer parentesis
-                const value = this.parse_expr();
+                const value = this.parse_additive_expr();
                 this.expect(
                     TokenType.RIGHT_PAREN,
                     "Token no esperado durante el parse: Se espera que se cierren los parentesis"
                 ) // elimina el segundo parentesis
-                this.eat()
+                console.log(this.at())
                 return value;
 
             default:

@@ -30,7 +30,7 @@ export class AppComponent {
   onChange(e: any) {
     try{
       this.output = repl(e.target.value);
-      // this.output = JSON.stringify(tokenize(e.target.value))
+      // console.log(tokenize(e.target.value))
     } catch (e: any) {
       this.output = 'Error compilando';
     }
