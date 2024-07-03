@@ -1,5 +1,5 @@
 
-import { Statement, Program, Expression, BinaryExp, Identifier, NumericLiteral, AssigmentExpression, VariableDeclaration, ExpressionDeclaration, } from './ast'
+import { Statement, Program, Expression, BinaryExp, Identifier, NumericLiteral, AssigmentExpression, VariableDeclaration, ExpressionDeclaration, LogicalExpression, } from './ast'
 import { Token, TokenType, tokenize } from './lexer'
 
 export default class Parser {
@@ -88,7 +88,7 @@ export default class Parser {
     }
 
     private parse_assignment_expr (): Expression {
-        let left = this.parse_additive_expr();
+        let left = this.parse_logical_expr();
 
         if(this.at().type == TokenType.EQUAL) {
             this.eat();
@@ -101,6 +101,23 @@ export default class Parser {
         }
 
         return left;
+    }
+
+    private parse_logical_expr(): Expression {
+        let left = this.parse_additive_expr();
+
+        while (this.at().type == TokenType.AND || this.at().type == TokenType.OR) {
+            const operator = this.eat().value;
+            const right = this.parse_additive_expr();
+            left = {
+                kind: "LogicalExpression",
+                operator,
+                left,
+                right,
+            } as LogicalExpression
+        }
+
+        return left
     }
 
     private parse_additive_expr(): Expression {
@@ -143,7 +160,7 @@ export default class Parser {
         const tk = this.at().type;
 
         switch (tk) {
-            case TokenType.IDENTIFIER:
+            case TokenType.IDENTIFIER: 
                 return { 
                     kind : "Identifier", 
                     symbol: this.eat().value
@@ -153,6 +170,16 @@ export default class Parser {
                     kind : "NumericLiteral", 
                     value: parseFloat(this.eat().value)
                 } as NumericLiteral;
+            case TokenType.TRUE:
+                return { 
+                    kind : "Identifier", 
+                    symbol: this.eat().value
+                } as Identifier;
+            case TokenType.FALSE:
+                return { 
+                    kind : "Identifier", 
+                    symbol: this.eat().value
+                } as Identifier;
             case TokenType.LEFT_PAREN:
                 this.eat(); // elimina el primer parentesis
                 const value = this.parse_additive_expr();
