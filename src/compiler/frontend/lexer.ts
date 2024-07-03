@@ -8,16 +8,11 @@ export enum TokenType {
     COMMA = "COMMA",
     DOT = "DOT",
 
-    // MINUS = "MINUS",
-    // PLUS = "PLUS",
-    // SLASH = "SLASH",
-    // STAR = "STAR",
-
     OPERATOR = "OPERATOR",
 
     SEMICOLON = "SEMICOLON",
+    IDENT = "IDENT",
 
-    // One or two character tokens
     BANG = "BANG",
     BANG_EQUAL = "BANG_EQUAL",
     EQUAL = "EQUAL",
@@ -27,12 +22,11 @@ export enum TokenType {
     LESS = "LESS",
     LESS_EQUAL = "LESS_EQUAL",
 
-    // Literals
     IDENTIFIER = "IDENTIFIER",
     STRING = "STRING",
     NUMBER = "NUMBER",
 
-    // Keywords
+    // KEYWORDS
     AND = "AND",
     CLASS = "CLASS",
     ELSE = "ELSE",
@@ -53,6 +47,25 @@ export enum TokenType {
     EOF = "EOF"
 }
 
+const KEYWORDS: Record<string, TokenType> = {
+    "true": TokenType.TRUE,
+    "false": TokenType.FALSE,
+    "and": TokenType.AND,
+    "or": TokenType.OR,
+    "if": TokenType.IF,
+    "else": TokenType.ELSE,
+    "for": TokenType.FOR,
+    "while": TokenType.WHILE,
+
+    "print": TokenType.PRINT,
+    "class": TokenType.CLASS,
+    "fun": TokenType.FUN,
+    "none": TokenType.NONE,
+    "return": TokenType.RETURN,
+    "super": TokenType.SUPER,
+    "self": TokenType.SELF,
+};
+
 export interface Token {
     value: string
     type: TokenType
@@ -66,15 +79,61 @@ export const tokenize = (source: string): Token[] => {
     while (entries.length > 0) {
         let entry = entries[0]; entries.shift()
 
-        if (entry == " ") continue
-
-        if (/[a-z]/.exec(entry)) { tokens.push({ value: entry, type: TokenType.IDENTIFIER }); continue }
+        if (entry == " " || entry == "\n") continue
 
         if (/[+\-*/%]/.exec(entry)) { tokens.push({ value: entry, type: TokenType.OPERATOR }); continue }
 
         if (/\(/.exec(entry)) { tokens.push({ value: entry, type: TokenType.LEFT_PAREN }); continue }
 
         if (/\)/.exec(entry)) { tokens.push({ value: entry, type: TokenType.RIGHT_PAREN }); continue }
+
+        if (/,/.exec(entry)) { tokens.push({ value: entry, type: TokenType.COMMA }); continue }
+
+        if (/[.]/.exec(entry)) { tokens.push({ value: entry, type: TokenType.DOT }); continue }
+
+        if (/;/.exec(entry)) { tokens.push({ value: entry, type: TokenType.SEMICOLON }); continue }
+
+        if(/\n/.exec(entry)) { tokens.push({ value: entry, type: TokenType.IDENT })}
+
+        if (/!/.exec(entry)) {
+            if (entries[0] == "=") {
+                entries.shift()
+                tokens.push({ value: entry + "=", type: TokenType.BANG_EQUAL })
+            } else {
+                tokens.push({ value: entry, type: TokenType.BANG })
+            }
+            continue
+        }
+
+        if (/=/.exec(entry)) {
+            if (entries[0] == "=") {
+                entries.shift()
+                tokens.push({ value: entry + "=", type: TokenType.EQUAL_EQUAL })
+            } else {
+                tokens.push({ value: entry, type: TokenType.EQUAL })
+            }
+            continue
+        }
+
+        if (/>/.exec(entry)) {
+            if (entries[0] == "=") {
+                entries.shift()
+                tokens.push({ value: entry + "=", type: TokenType.GREATER_EQUAL })
+            } else {
+                tokens.push({ value: entry, type: TokenType.GREATER })
+            }
+            continue
+        }
+
+        if (/</.exec(entry)) {
+            if (entries[0] == "=") {
+                entries.shift()
+                tokens.push({ value: entry + "=", type: TokenType.LESS_EQUAL })
+            } else {
+                tokens.push({ value: entry, type: TokenType.LESS })
+            }
+            continue
+        }
 
         if (/\d/.exec(entry)) {
             let number = entry
@@ -85,10 +144,29 @@ export const tokenize = (source: string): Token[] => {
             }
 
             tokens.push({ value: number, type: TokenType.NUMBER })
-            continue;
+            continue
         }
 
-        console.log('caracter desconocido: ' + entry)
+        if (/[a-zA-Z]/.exec(entry)) {
+            let identifier = entry
+
+            while (entries.length > 0 && /[a-zA-Z]/.exec(entries[0])) {
+                identifier += entries[0]
+                entries.shift()
+            }
+
+            const reserved = KEYWORDS[identifier]
+
+            if (reserved) {
+                tokens.push({ value: identifier, type: reserved })
+                continue
+            } else {
+                tokens.push({ value: identifier, type: TokenType.IDENTIFIER })
+                continue
+            }
+        }
+
+        throw new Error(`Token no esperado: ${entry}`)
     }
 
     tokens.push({ value: "EndOfFile", type: TokenType.EOF })

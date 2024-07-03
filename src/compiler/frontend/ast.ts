@@ -16,6 +16,13 @@ export interface Program extends Statement {
 
 export interface Expression extends Statement {}
 
+// export interface VariableDeclaration extends Expression {
+//     kind: "VariableDeclaration"
+//     assigne: Expression
+//     value: Expression
+
+// }
+
 export interface BinaryExp extends Expression {
     kind: "BinaryExp"
     left: Expression

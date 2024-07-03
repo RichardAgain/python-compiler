@@ -1,6 +1,7 @@
 import { repl } from './../compiler/main';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { tokenize } from '../compiler/frontend/lexer';
 
 @Component({
   selector: 'app-root',
@@ -8,29 +9,28 @@ import { RouterOutlet } from '@angular/router';
   imports: [RouterOutlet],
   // templateUrl: './app.component.html',
   template: `
-    <h1 class="text-center text-3xl font-bold underline">Hello world!</h1>
+    <h1 class="text-center text-3xl font-bold underline">{{ title }}</h1><br>
 
     <div class="flex place-content-evenly">
       <textarea (keyup)="onChange($event)" type="text" name="" id=""
-        class="h-[90vh] w-2/5 border border-black font-mono text-sm">  
+        class="min-h-[90vh] max-h-[90vh] w-2/5 border border-black font-mono text-sm">  
       </textarea>
 
       <pre class="h-[90vh] w-2/5 overflow-scroll border border-black text-xs">
         {{ output }}
-      </pre
-      >
+      </pre>
     </div>
   `,
 })
 export class AppComponent {
   title = 'Hola Dani 👋👋👋';
 
-  output = repl('x + 1 * 2');
+  output = '';
 
   onChange(e: any) {
-    console.log(e.target.value);
     try{
       this.output = repl(e.target.value);
+      // this.output = JSON.stringify(tokenize(e.target.value))
     } catch (e: any) {
       this.output = 'Error compilando';
     }

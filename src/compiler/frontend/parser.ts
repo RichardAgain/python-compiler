@@ -21,7 +21,7 @@ export default class Parser {
     private expect (type: TokenType, err: any) {
         const prev = this.tokens.shift() as Token;
 
-        if (!prev || prev.type == type) {
+        if (!prev || prev.type != type) {
             console.error("Parser Error:\n", err, prev, " - Se esperaba: ", type)
             process.exit()
         }
@@ -29,9 +29,7 @@ export default class Parser {
         return prev;
     }
 
-    public produceAST (sourceCode: string): Program {
-
-        
+    public produceAST (sourceCode: string): Program {        
         this.tokens = tokenize(sourceCode);
         console.log(this.tokens)
         
@@ -93,8 +91,9 @@ export default class Parser {
         return left
     } 
 
-    private parse_primary_expr (): Expression{
+    private parse_primary_expr (): Expression {
         // Tekinter omg
+        // 🔥🔥🔥🔥
         const tk = this.at().type;
 
         switch (tk) {
@@ -105,13 +104,13 @@ export default class Parser {
                     kind : "NumericLiteral", 
                     value: parseFloat(this.eat().value)
                 } as NumericLiteral;
-            case TokenType.RIGHT_PAREN:
+            case TokenType.LEFT_PAREN:
                 this.eat(); // elimina el primer parentesis
                 const value = this.parse_expr();
-                // this.expect(
-                //     TokenType.CloseParent,
-                //     "Token no esperado durante el parse: Se espera que se cierren los parentesis"
-                // ) // elimina el segundo parentesis
+                this.expect(
+                    TokenType.RIGHT_PAREN,
+                    "Token no esperado durante el parse: Se espera que se cierren los parentesis"
+                ) // elimina el segundo parentesis
                 this.eat()
                 return value;
 
