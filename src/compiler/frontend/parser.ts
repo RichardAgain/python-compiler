@@ -35,7 +35,6 @@ export default class Parser {
 
     public produceAST (sourceCode: string): Program {        
         this.tokens = tokenize(sourceCode);
-        console.log(this.tokens)
         
         const program: Program = {
             kind: "Program",
@@ -52,8 +51,6 @@ export default class Parser {
     }
 
     private parse_stmt (): Statement {
-        // no hay ninguna declaracion, se salta
-
         switch (this.at().type) {
             case TokenType.IDENTIFIER:
                 if (this.next().type == TokenType.EQUAL) {
@@ -67,13 +64,7 @@ export default class Parser {
         }
                 
     }
-    private parse_expr_declaration(): Statement {
-        return {
-            kind: "ExpressionDeclaration",
-            expression: this.parse_expr(),
-        } as ExpressionDeclaration;
-    }
-
+    
     private parse_variable_declaration(): Statement {
 
         const identifier = this.eat().value;
@@ -85,12 +76,19 @@ export default class Parser {
         } as VariableDeclaration;
     }
 
+    private parse_expr_declaration(): Statement {
+        return {
+            kind: "ExpressionDeclaration",
+            expression: this.parse_expr(),
+        } as ExpressionDeclaration;
+    }
+
     private parse_expr (): Expression {
         return this.parse_assignment_expr();
     }
 
     private parse_assignment_expr (): Expression {
-        let left = this.parse_primary_expr();
+        let left = this.parse_additive_expr();
 
         if(this.at().type == TokenType.EQUAL) {
             this.eat();
@@ -146,7 +144,10 @@ export default class Parser {
 
         switch (tk) {
             case TokenType.IDENTIFIER:
-                return { kind : "Identifier", symbol: this.eat().value} as Identifier;
+                return { 
+                    kind : "Identifier", 
+                    symbol: this.eat().value
+                } as Identifier;
             case TokenType.NUMBER:
                 return { 
                     kind : "NumericLiteral", 
@@ -159,7 +160,6 @@ export default class Parser {
                     TokenType.RIGHT_PAREN,
                     "Token no esperado durante el parse: Se espera que se cierren los parentesis"
                 ) // elimina el segundo parentesis
-                console.log(this.at())
                 return value;
 
             default:

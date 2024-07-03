@@ -25,12 +25,11 @@ import { tokenize } from '../compiler/frontend/lexer';
 export class AppComponent {
   title = 'Hola Dani 👋👋👋';
 
-  output = '';
+  output = repl('a + b');
 
   onChange(e: any) {
     try{
       this.output = repl(e.target.value);
-      // console.log(tokenize(e.target.value))
     } catch (e: any) {
       this.output = 'Error compilando';
     }
