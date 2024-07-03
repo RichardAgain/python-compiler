@@ -1,5 +1,5 @@
 
-import { Statement, Program, Expression, BinaryExp, Identifier, NumericLiteral, AssigmentExpression, VariableDeclaration, ExpressionDeclaration, LogicalExpression, } from './ast'
+import { Statement, Program, Expression, BinaryExp, Identifier, NumericLiteral, AssigmentExpression, VariableDeclaration, ExpressionDeclaration, LogicalExpression, IfStatement, BlockStatement, WhileStatement, } from './ast'
 import { Token, TokenType, tokenize } from './lexer'
 
 export default class Parser {
@@ -56,17 +56,48 @@ export default class Parser {
                 if (this.next().type == TokenType.EQUAL) {
                     return this.parse_variable_declaration();
                 } else {
-                    return this.parse_expr_declaration();
+                    return this.parse_expr_declaration()
                 }
-            
+            case TokenType.IF:
+                return this.parse_if_declaration()
+            case TokenType.WHILE:
+                return this.parse_while_declaration()
             default:
                 return this.parse_expr_declaration();
         }
                 
     }
+
+    private parse_if_declaration(): Statement {
+        this.eat()
+
+        const test = this.parse_logical_expr()
+        this.expect(TokenType.DOUBLE_DOT, 'falta los dos puntos jsjs')
+        return {
+            kind: "IfStatement",
+            test,
+            consequent: { } as BlockStatement,
+
+        } as IfStatement
+
+    }
+
+    private parse_while_declaration(): Statement {
+        this.eat()
+
+        const test = this.parse_logical_expr()
+        this.expect(TokenType.DOUBLE_DOT, 'falta los dos puntos jsjs')
+        return {
+            kind: "WhileStatement",
+            test,
+            body: { } as BlockStatement,
+
+        } as WhileStatement
+
+    }
+
     
     private parse_variable_declaration(): Statement {
-
         const identifier = this.eat().value;
         this.eat(); // elimina el "="
         return {
@@ -102,6 +133,7 @@ export default class Parser {
 
         return left;
     }
+
 
     private parse_logical_expr(): Expression {
         let left = this.parse_additive_expr();

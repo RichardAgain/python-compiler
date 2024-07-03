@@ -23,9 +23,9 @@ import { tokenize } from '../compiler/frontend/lexer';
   `,
 })
 export class AppComponent {
-  title = 'Hola Dani 👋👋👋';
+  title = 'HOLA PORFEE 👋👋👋';
 
-  output = repl('a + b');
+  output = '';
 
   onChange(e: any) {
     try{

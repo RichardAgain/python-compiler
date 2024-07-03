@@ -7,6 +7,7 @@ export enum TokenType {
     RIGHT_BRACE = "RIGHT_BRACE",
     COMMA = "COMMA",
     DOT = "DOT",
+    DOUBLE_DOT = "DOUBLE_DOT",
 
     OPERATOR = "OPERATOR",
 
@@ -90,6 +91,8 @@ export const tokenize = (source: string): Token[] => {
         if (/,/.exec(entry)) { tokens.push({ value: entry, type: TokenType.COMMA }); continue }
 
         if (/[.]/.exec(entry)) { tokens.push({ value: entry, type: TokenType.DOT }); continue }
+
+        if (/:/.exec(entry)) { tokens.push({ value: entry, type: TokenType.DOUBLE_DOT }); continue }
 
         if (/;/.exec(entry)) { tokens.push({ value: entry, type: TokenType.SEMICOLON }); continue }
 
