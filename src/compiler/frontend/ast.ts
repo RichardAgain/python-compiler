@@ -3,6 +3,7 @@ export type NodeType =
   | 'Program'
   | 'VariableDeclaration'
   | 'ExpressionDeclaration'
+  | 'BlockStatement'
   | 'IfStatement'
   | 'WhileStatement'
   //EXPRESSIONS
@@ -32,7 +33,10 @@ export interface VariableDeclaration extends Statement {
   value: Expression;
 }
 
-export interface BlockStatement extends Statement {}
+export interface BlockStatement extends Statement {
+    kind: "BlockStatement",
+    body: Statement[],
+}
 
 export interface IfStatement extends Statement {
   kind: 'IfStatement';

@@ -12,7 +12,7 @@ import { tokenize } from '../compiler/frontend/lexer';
     <h1 class="text-center text-3xl font-bold underline">{{ title }}</h1><br>
 
     <div class="flex place-content-evenly">
-      <textarea (keyup)="onChange($event)" type="text" name="" id=""
+      <textarea (keyup)="onChange($event)" (keydown)="onKeyDown($event)" type="text" name="" id=""
         class="min-h-[90vh] max-h-[90vh] w-2/5 border border-black font-mono text-sm">  
       </textarea>
 
@@ -30,8 +30,24 @@ export class AppComponent {
   onChange(e: any) {
     try{
       this.output = repl(e.target.value);
+      // this.output = JSON.stringify(tokenize(e.target.value), null, 4);
     } catch (e: any) {
       this.output = 'Error compilando';
+    }
+  }
+
+  onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = e.target as HTMLTextAreaElement;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+  
+      // Insertar el carácter de tabulación en la posición del cursor
+      textarea.value = textarea.value.substring(0, start) + '\t' + textarea.value.substring(end);
+  
+      // Mover el cursor después del carácter de tabulación
+      textarea.selectionStart = textarea.selectionEnd = start + 1;
     }
   }
 }

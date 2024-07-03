@@ -96,7 +96,7 @@ export const tokenize = (source: string): Token[] => {
 
         if (/;/.exec(entry)) { tokens.push({ value: entry, type: TokenType.SEMICOLON }); continue }
 
-        if(/\n/.exec(entry)) { tokens.push({ value: entry, type: TokenType.IDENT })}
+        if(/\t/.exec(entry)) { tokens.push({ value: entry, type: TokenType.IDENT }); continue }
 
         if (/!/.exec(entry)) {
             if (entries[0] == "=") {

@@ -64,8 +64,7 @@ export default class Parser {
                 return this.parse_while_declaration()
             default:
                 return this.parse_expr_declaration();
-        }
-                
+        }       
     }
 
     private parse_if_declaration(): Statement {
@@ -76,8 +75,7 @@ export default class Parser {
         return {
             kind: "IfStatement",
             test,
-            consequent: { } as BlockStatement,
-
+            consequent: this.parse_block_declaration(),
         } as IfStatement
 
     }
@@ -90,13 +88,27 @@ export default class Parser {
         return {
             kind: "WhileStatement",
             test,
-            body: { } as BlockStatement,
-
+            body: this.parse_block_declaration(),
         } as WhileStatement
-
     }
 
-    
+    private parse_block_declaration(): Statement {
+        this.expect(TokenType.IDENT, 'Falta identar')
+        let body = [
+            this.parse_stmt(),
+        ]
+
+        while (this.at().type == TokenType.IDENT) {
+            this.eat()
+            body.push(this.parse_stmt())
+        }
+
+        return {
+            kind: "BlockStatement",
+            body,
+        } as BlockStatement
+    }
+
     private parse_variable_declaration(): Statement {
         const identifier = this.eat().value;
         this.eat(); // elimina el "="
