@@ -7,11 +7,16 @@ export type NodeType =
   | 'IfStatement'
   | 'WhileStatement'
   //EXPRESSIONS
-  | 'NumericLiteral'
+  | 'MemberExpression'
+  | 'CallExpression'
   | 'AssigmentExpression'
   | 'LogicalExpression'
+  | 'BinaryExp'
+  // LITERALS
+  | 'ObjectLiteral'
+  | 'Property'
+  | 'NumericLiteral'
   | 'Identifier'
-  | 'BinaryExp';
 
 export interface Statement {
   kind: NodeType;
@@ -72,6 +77,19 @@ export interface BinaryExp extends Expression {
   right: Expression;
 }
 
+export interface MemberExpression extends Expression {
+  kind: 'MemberExpression';
+  object: Expression;
+  property: Expression;
+  computed: true
+}
+
+export interface CallExpression extends Expression {
+  kind: 'CallExpression';
+  args: Expression[];
+  calle: Expression;
+}
+
 export interface Identifier extends Expression {
   kind: 'Identifier';
   symbol: string;
@@ -80,4 +98,15 @@ export interface Identifier extends Expression {
 export interface NumericLiteral extends Expression {
   kind: 'NumericLiteral';
   value: number;
+}
+
+export interface Property extends Expression {
+  kind: 'Property',
+  key: string,
+  value: Expression,
+}
+
+export interface ObjectLiteral extends Expression {
+  kind: 'ObjectLiteral';
+  properties: Property[];
 }

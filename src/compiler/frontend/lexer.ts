@@ -2,17 +2,20 @@
 export enum TokenType {
     LEFT_PAREN = "LEFT_PAREN",
     RIGHT_PAREN = "RIGHT_PAREN",
-
     LEFT_BRACE = "LEFT_BRACE",
     RIGHT_BRACE = "RIGHT_BRACE",
+    LEFT_BRACKET = "LEFT_BRACKET",
+    RIGHT_BRACKET = "RIGHT_BRACKET",
+
     COMMA = "COMMA",
     DOT = "DOT",
-    DOUBLE_DOT = "DOUBLE_DOT",
+    COLON = "COLON",
+    SEMICOLON = "SEMICOLON",
 
     OPERATOR = "OPERATOR",
 
-    SEMICOLON = "SEMICOLON",
     IDENT = "IDENT",
+    LINE_JUMP = "LINE_JUMP",
 
     BANG = "BANG",
     BANG_EQUAL = "BANG_EQUAL",
@@ -31,7 +34,6 @@ export enum TokenType {
     AND = "AND",
     CLASS = "CLASS",
     ELSE = "ELSE",
-    FALSE = "FALSE",
     FUN = "FUN",
     FOR = "FOR",
     IF = "IF",
@@ -41,30 +43,30 @@ export enum TokenType {
     RETURN = "RETURN",
     SUPER = "SUPER",
     SELF = "SELF",
-    TRUE = "TRUE",
     WHILE = "WHILE",
+
+    INT = 'INT',
 
     // End of file
     EOF = "EOF"
 }
 
 const KEYWORDS: Record<string, TokenType> = {
-    "true": TokenType.TRUE,
-    "false": TokenType.FALSE,
     "and": TokenType.AND,
     "or": TokenType.OR,
     "if": TokenType.IF,
     "else": TokenType.ELSE,
     "for": TokenType.FOR,
     "while": TokenType.WHILE,
-
-    "print": TokenType.PRINT,
+    
     "class": TokenType.CLASS,
     "fun": TokenType.FUN,
     "none": TokenType.NONE,
     "return": TokenType.RETURN,
     "super": TokenType.SUPER,
     "self": TokenType.SELF,
+
+    'int': TokenType.INT
 };
 
 export interface Token {
@@ -80,19 +82,27 @@ export const tokenize = (source: string): Token[] => {
     while (entries.length > 0) {
         let entry = entries[0]; entries.shift()
 
-        if (entry == " " || entry == "\n") continue
+        if (entry == " " || entry == '\n') continue
 
         if (/[+\-*/%]/.exec(entry)) { tokens.push({ value: entry, type: TokenType.OPERATOR }); continue }
 
         if (/\(/.exec(entry)) { tokens.push({ value: entry, type: TokenType.LEFT_PAREN }); continue }
 
         if (/\)/.exec(entry)) { tokens.push({ value: entry, type: TokenType.RIGHT_PAREN }); continue }
+        
+        if (/\{/.exec(entry)) { tokens.push({ value: entry, type: TokenType.LEFT_BRACE }); continue }
+        
+        if (/\}/.exec(entry)) { tokens.push({ value: entry, type: TokenType.RIGHT_BRACE }); continue }
+        
+        if (/\[/.exec(entry)) { tokens.push({ value: entry, type: TokenType.LEFT_BRACKET }); continue }
+        
+        if (/\]/.exec(entry)) { tokens.push({ value: entry, type: TokenType.RIGHT_BRACKET }); continue }
 
         if (/,/.exec(entry)) { tokens.push({ value: entry, type: TokenType.COMMA }); continue }
 
         if (/[.]/.exec(entry)) { tokens.push({ value: entry, type: TokenType.DOT }); continue }
 
-        if (/:/.exec(entry)) { tokens.push({ value: entry, type: TokenType.DOUBLE_DOT }); continue }
+        if (/:/.exec(entry)) { tokens.push({ value: entry, type: TokenType.COLON }); continue }
 
         if (/;/.exec(entry)) { tokens.push({ value: entry, type: TokenType.SEMICOLON }); continue }
 
