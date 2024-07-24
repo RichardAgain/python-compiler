@@ -3,9 +3,6 @@ import { MK_BOOLEAN, MK_NATIVE_FN, MK_NULL, MK_NUMBER, NumberValue, RuntimeValue
 export function createGlobalEnv () {
     const env = new Enviroment()
 
-    env.declareVariable("x", MK_NUMBER(10))
-    env.declareVariable("y", MK_NUMBER(20))
-
     env.declareVariable('true', MK_BOOLEAN(true), true)
     env.declareVariable('false', MK_BOOLEAN(false), true)
     env.declareVariable('null', MK_NULL(), true)

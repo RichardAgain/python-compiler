@@ -1,6 +1,6 @@
 
 import Enviroment from '../runtime/environment';
-import { Statement, Program, Expression, BinaryExp, Identifier, NumericLiteral, AssigmentExpression, VariableDeclaration, ExpressionDeclaration, LogicalExpression, IfStatement, BlockStatement, WhileStatement, Property, ObjectLiteral, CallExpression, MemberExpression, } from './ast'
+import { Statement, Program, Expression, BinaryExp, Identifier, NumericLiteral, AssigmentExpression, VariableDeclaration, ExpressionDeclaration, LogicalExpression, IfStatement, BlockStatement, WhileStatement, Property, ObjectLiteral, CallExpression, MemberExpression, StringLiteral, FunctionDeclaration, ForStatement, ArrayLiteral, } from './ast'
 import { Token, TokenType, tokenize } from './lexer'
 
 export default class Parser {
@@ -70,9 +70,29 @@ export default class Parser {
                 return this.parse_if_declaration()
             case TokenType.WHILE:
                 return this.parse_while_declaration()
+            case TokenType.FOR:
+                return this.parse_for_declaration()
+            case TokenType.FUN:
+                return this.parse_function_declaration()
             default:
                 return this.parse_expr_declaration();
         }       
+    }
+
+    private parse_function_declaration(): Statement {
+        this.eat()
+        const identifier = this.expect(TokenType.IDENTIFIER, "Se esperaba un identificador").value
+
+        const args = this.parse_args()
+
+        this.expect(TokenType.COLON, "Se esperaba ':'")
+
+        return {
+            kind: "FunctionDeclaration",
+            identifier: { kind: "Identifier", symbol: identifier } as Identifier,
+            args,
+            body: this.parse_block_declaration(),
+        } as FunctionDeclaration
     }
 
     private parse_if_declaration(): Statement {
@@ -80,12 +100,40 @@ export default class Parser {
 
         const test = this.parse_logical_expr()
         this.expect(TokenType.COLON, 'falta los dos puntos jsjs')
+        const consequent = this.parse_block_declaration()
+
+        if (this.at().type == TokenType.ELSE) {
+            this.eat()
+            this.expect(TokenType.COLON, "Faltan los dos puntos")
+            return {
+                kind: "IfStatement",
+                test,
+                consequent,
+                alternate: this.parse_block_declaration(),
+            } as IfStatement
+        }
+
         return {
             kind: "IfStatement",
             test,
-            consequent: this.parse_block_declaration(),
+            consequent,
         } as IfStatement
+    }
 
+    private parse_for_declaration(): Statement {
+        this.eat()
+
+        const identifier = this.expect(TokenType.IDENTIFIER, "Se esperaba un identificador").value
+        this.expect(TokenType.IN, "Se esperaba 'in'")
+        const iterable = this.parse_expr()
+        this.expect(TokenType.COLON, "Se esperaba ':'")
+
+        return {
+            kind: "ForStatement",
+            identifier: { kind: "Identifier", symbol: identifier } as Identifier,
+            iterable,
+            body: this.parse_block_declaration(),
+        } as ForStatement
     }
 
     private parse_while_declaration(): Statement {
@@ -123,7 +171,7 @@ export default class Parser {
         return {
             kind: "VariableDeclaration",
             identifier: { kind: "Identifier", symbol: identifier } as Identifier,
-            value: this.parse_additive_expr(),
+            value: this.parse_object_expr(),
         } as VariableDeclaration;
     }
 
@@ -160,33 +208,53 @@ export default class Parser {
 
     private parse_object_expr (): Expression {
         
-        if (this.at().type !== TokenType.LEFT_BRACE) {
+        if (this.at().type == TokenType.LEFT_BRACE) {
+            this.eat()
+            const properties = new Array<Property>()
+    
+            while (this.not_eof() && this.at().type !== TokenType.RIGHT_BRACE) {
+                if (properties.length > 0) {
+                    this.expect(TokenType.COMMA, "Se esperaba ','")
+                }
+    
+                const key = this.parse_primary_expr()
+                this.expect(TokenType.COLON, "Se esperaba ':'")
+                const value = this.parse_expr();
+                properties.push({
+                    kind: "Property",
+                    key,
+                    value,
+                } as Property)
+            }
+    
+            this.expect(TokenType.RIGHT_BRACE, "Se esperaba '}'")
+            return {
+                kind: "ObjectLiteral",
+                properties,
+            } as ObjectLiteral
+
+        } else if (this.at().type == TokenType.LEFT_BRACKET) {
+            this.eat()
+            const elements = new Array<Expression>()
+    
+            while (this.not_eof() && this.at().type !== TokenType.RIGHT_BRACKET) {
+                if (elements.length > 0) {
+                    this.expect(TokenType.COMMA, "Se esperaba ','")
+                }
+    
+                elements.push(this.parse_expr())
+            }
+    
+            this.expect(TokenType.RIGHT_BRACKET, "Se esperaba ']'")
+            return {
+                kind: "ArrayLiteral",
+                elements,
+            } as ArrayLiteral
+
+        } else {
             return this.parse_logical_expr();
         }
 
-        this.eat()
-        const properties = new Array<Property>()
-
-        while (this.not_eof() && this.at().type !== TokenType.RIGHT_BRACE) {
-            if (properties.length > 0) {
-                this.expect(TokenType.COMMA, "Se esperaba ','")
-            }
-
-            const key = this.expect(TokenType.IDENTIFIER, 'Expected Object key').value;
-            this.expect(TokenType.COLON, "Se esperaba ':'")
-            const value = this.parse_expr();
-            properties.push({
-                kind: "Property",
-                key,
-                value,
-            } as Property)
-        }
-
-        this.expect(TokenType.RIGHT_BRACE, "Se esperaba '}'")
-        return {
-            kind: "ObjectLiteral",
-            properties,
-        } as ObjectLiteral
     }
 
     private parse_logical_expr(): Expression {
@@ -334,6 +402,18 @@ export default class Parser {
                     kind : "NumericLiteral", 
                     value: parseFloat(this.eat().value)
                 } as NumericLiteral;
+
+            case TokenType.QUOTE:
+                this.eat();
+                let string = "";
+                while (this.at().type != TokenType.QUOTE && this.at().type != TokenType.EOF) {
+                    string += this.eat().value;
+                }
+                this.expect(TokenType.QUOTE, "Se esperaba una comilla")
+                return { 
+                    kind : "StringLiteral", 
+                    value: string
+                } as StringLiteral;
                 
             case TokenType.LEFT_PAREN:
                 this.eat(); // elimina el primer parentesis

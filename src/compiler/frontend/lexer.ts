@@ -7,6 +7,8 @@ export enum TokenType {
     LEFT_BRACKET = "LEFT_BRACKET",
     RIGHT_BRACKET = "RIGHT_BRACKET",
 
+    QUOTE = "QUOTE",
+
     COMMA = "COMMA",
     DOT = "DOT",
     COLON = "COLON",
@@ -46,6 +48,7 @@ export enum TokenType {
     WHILE = "WHILE",
 
     INT = 'INT',
+    IN = 'IN',
 
     // End of file
     EOF = "EOF"
@@ -58,9 +61,11 @@ const KEYWORDS: Record<string, TokenType> = {
     "else": TokenType.ELSE,
     "for": TokenType.FOR,
     "while": TokenType.WHILE,
-    
+    // "print": TokenType.PRINT,
+    "def": TokenType.FUN,
+    "in": TokenType.IN,
+
     "class": TokenType.CLASS,
-    "fun": TokenType.FUN,
     "none": TokenType.NONE,
     "return": TokenType.RETURN,
     "super": TokenType.SUPER,
@@ -85,6 +90,8 @@ export const tokenize = (source: string): Token[] => {
         if (entry == " " || entry == '\n') continue
 
         if (/[+\-*/%]/.exec(entry)) { tokens.push({ value: entry, type: TokenType.OPERATOR }); continue }
+
+        if (/"/.exec(entry)) { tokens.push({ value: entry, type: TokenType.QUOTE }); continue }
 
         if (/\(/.exec(entry)) { tokens.push({ value: entry, type: TokenType.LEFT_PAREN }); continue }
 
@@ -160,10 +167,10 @@ export const tokenize = (source: string): Token[] => {
             continue
         }
 
-        if (/[a-zA-Z]/.exec(entry)) {
+        if (/[a-zA-Z_ñ]/.exec(entry)) {
             let identifier = entry
 
-            while (entries.length > 0 && /[a-zA-Z]/.exec(entries[0])) {
+            while (entries.length > 0 && /[a-zA-Z_ñ0-9]/.exec(entries[0])) {
                 identifier += entries[0]
                 entries.shift()
             }

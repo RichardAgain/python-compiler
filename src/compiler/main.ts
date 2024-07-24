@@ -18,7 +18,6 @@ export const repl = (source: string) => {
     const program = parser.produceAST(source)
     const result = interpret(program, env)
     
-    let output = '\n'
-    env.output.map((item: any) => output += item.value + '\n');
+    let output = '\n' + result
     return output
 }

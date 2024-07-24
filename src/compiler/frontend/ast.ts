@@ -3,8 +3,10 @@ export type NodeType =
   | 'Program'
   | 'VariableDeclaration'
   | 'ExpressionDeclaration'
+  | 'FunctionDeclaration'
   | 'BlockStatement'
-  | 'IfStatement'
+  | 'IfStatement' 
+  | 'ForStatement'
   | 'WhileStatement'
   //EXPRESSIONS
   | 'MemberExpression'
@@ -14,8 +16,10 @@ export type NodeType =
   | 'BinaryExp'
   // LITERALS
   | 'ObjectLiteral'
+  | 'ArrayLiteral'
   | 'Property'
   | 'NumericLiteral'
+  | 'StringLiteral'
   | 'Identifier'
 
 export interface Statement {
@@ -38,6 +42,13 @@ export interface VariableDeclaration extends Statement {
   value: Expression;
 }
 
+export interface FunctionDeclaration extends Statement {
+  kind: 'FunctionDeclaration';
+  identifier: Identifier;
+  args: Expression[];
+  body: BlockStatement;
+}
+
 export interface BlockStatement extends Statement {
     kind: "BlockStatement",
     body: Statement[],
@@ -47,6 +58,14 @@ export interface IfStatement extends Statement {
   kind: 'IfStatement';
   test: Expression;
   consequent: BlockStatement;
+  alternate?: BlockStatement;
+}
+
+export interface ForStatement extends Statement {
+  kind: 'ForStatement',
+  identifier: Identifier,
+  iterable: Expression,
+  body: BlockStatement,
 }
 
 export interface WhileStatement extends Statement {
@@ -100,13 +119,23 @@ export interface NumericLiteral extends Expression {
   value: number;
 }
 
+export interface StringLiteral extends Expression {
+  kind: 'StringLiteral';
+  value: string;
+}
+
 export interface Property extends Expression {
   kind: 'Property',
-  key: string,
+  key: Expression,
   value: Expression,
 }
 
 export interface ObjectLiteral extends Expression {
   kind: 'ObjectLiteral';
   properties: Property[];
+}
+
+export interface ArrayLiteral extends Expression { 
+  kind: 'ArrayLiteral';
+  elements: Expression[];
 }
